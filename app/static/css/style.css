@@ -213,6 +213,19 @@ section { padding: 3rem 0; }
     font-weight: 600;
 }
 
+.model-bench {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.model-bench .meta-item span {
+    color: var(--accent);
+}
+
 .model-desc {
     color: var(--text-secondary);
     font-size: 0.85rem;

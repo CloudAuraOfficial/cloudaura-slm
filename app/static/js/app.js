@@ -78,11 +78,41 @@ function populateModelCards(models) {
     if (!grid) return;
     grid.innerHTML = '';
 
+    const summaryMap = {};
+    if (benchmarkData && benchmarkData.summaries) {
+        benchmarkData.summaries.forEach(s => { summaryMap[s.model] = s; });
+    }
+
     models.forEach(m => {
         const cls = MODEL_COLORS[m.name] || 'phi3';
         const desc = MODEL_DESCRIPTIONS[m.name] || {};
+        const bench = summaryMap[m.name];
         const card = document.createElement('div');
         card.className = `model-card ${cls}`;
+
+        let benchHtml = '';
+        if (bench) {
+            benchHtml = `
+            <div class="model-bench">
+                <div class="meta-item">
+                    <label>Speed</label>
+                    <span>${formatNumber(bench.avg_tokens_per_second)} tok/s</span>
+                </div>
+                <div class="meta-item">
+                    <label>TTFT</label>
+                    <span>${formatNumber(bench.avg_time_to_first_token_ms)} ms</span>
+                </div>
+                <div class="meta-item">
+                    <label>Avg Latency</label>
+                    <span>${formatNumber(bench.avg_total_duration_ms)} ms</span>
+                </div>
+                <div class="meta-item">
+                    <label>Avg Tokens</label>
+                    <span>${formatNumber(bench.avg_tokens_generated)}</span>
+                </div>
+            </div>`;
+        }
+
         card.innerHTML = `
             <div class="model-header">
                 <div class="model-name">${m.name}</div>
@@ -106,6 +136,7 @@ function populateModelCards(models) {
                     <span>${m.family}</span>
                 </div>
             </div>
+            ${benchHtml}
             <p class="model-desc">${desc.focus || ''}</p>
         `;
         grid.appendChild(card);
@@ -174,6 +205,10 @@ function renderBenchmarkResults(data) {
     renderBarChart('tokens-chart', data.summaries, 'avg_tokens_generated', 'tokens');
     renderResultsTable(data.results);
     renderHardwareInfo(data.hardware);
+
+    if (modelsInfo.length > 0) {
+        populateModelCards(modelsInfo);
+    }
 
     const ts = document.getElementById('benchmark-timestamp');
     if (ts) {
